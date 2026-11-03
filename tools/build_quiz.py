@@ -66,7 +66,7 @@ def parse(path, subject):
         if len(options) != 4:
             raise SystemExit(f"{path.name} {num}번: 보기 {len(options)}개")
 
-        part = 1 if num <= 20 else 2 if num <= 40 else 3 if num <= 50 else 4
+        part = 1 if num <= 20 else 2 if num <= 40 else 3 if num <= 50 else 4 if num <= 100 else 5
         questions.append({
             "id": f"{subject}-{num}",
             "subject": subject,

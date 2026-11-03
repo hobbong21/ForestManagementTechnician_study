@@ -110,7 +110,7 @@ function h(tag, attrs = {}, ...kids) {
   return el;
 }
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function partLabel(p) { return ["2021 공개", "기본", "심화", "참고자료", "기사기출"][p]; }
+function partLabel(p) { return ["2021 공개", "기본", "심화", "참고자료", "기사기출", "법령·지침 원문"][p]; }
 function mark(q, k) { return q.marks ? q.marks[k] : MARKS[k]; }
 function isRight(q, k) { return q.accept ? q.accept.includes(k) : k === q.answer; }
 function wrongSet() { return new Set(store.get("wrong", [])); }
@@ -151,7 +151,7 @@ function home() {
       h("select", { id: "pSubject" }, ...DATA.map(s => h("option", { value: s.name }, `${s.name} (${s.kind})`))),
       h("select", { id: "pPart" },
         h("option", { value: "0" }, "전체 파트"), h("option", { value: "1" }, "Part 1 기본"),
-        h("option", { value: "2" }, "Part 2 심화"), h("option", { value: "3" }, "Part 3 참고자료"), h("option", { value: "4" }, "Part 4 산림기사 기출")),
+        h("option", { value: "2" }, "Part 2 심화"), h("option", { value: "3" }, "Part 3 참고자료"), h("option", { value: "4" }, "Part 4 산림기사 기출"), h("option", { value: "5" }, "Part 5 법령·지침 원문")),
       h("label", { class: "chip" }, h("input", { type: "checkbox", id: "pShuffle", checked: true }), "섞기")),
     h("div", { style: "margin-top:14px" }, h("button", { class: "primary", onclick: startPractice }, "시작")),
   );

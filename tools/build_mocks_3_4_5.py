@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import os, re
 
-base_dir = r"C:\Users\owner\Desktop\project\04_예상문제"
-out_dir = r"C:\Users\owner\Desktop\project\05_모의고사"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_dir = os.path.join(ROOT, "04_예상문제")
+out_dir = os.path.join(ROOT, "05_모의고사")
 
 # Partition definitions
 mock_partitions = {
@@ -45,12 +46,12 @@ mock_partitions = {
 }
 
 subjects_info = [
-    (1, "제1과목: 조림학", "01. 조림 예상문제.md"),
-    (2, "제2과목: 산림보호학", "02. 산림보호 예상문제.md"),
-    (3, "제3과목: 임업경영학", "03. 산림경영 예상문제.md"),
-    (4, "제4과목: 산림관계법규", "04. 산림관계법규 예상문제.md"),
-    (5, "제5과목: 산림토목학(임도·사방)", "05. 산림토목(임도·사방) 예상문제.md"),
-    (6, "[부록: 선택과목 대비] 제5과목 대체: 임산가공학", "06. 임산가공 예상문제.md")
+    (1, "제1과목: 조림학", "01_조림_예상문제.md"),
+    (2, "제2과목: 산림보호학", "02_산림보호_예상문제.md"),
+    (3, "제3과목: 임업경영학", "03_산림경영_예상문제.md"),
+    (4, "제4과목: 산림관계법규", "04_산림관계법규_예상문제.md"),
+    (5, "제5과목: 산림토목학(임도·사방)", "05_산림토목(임도·사방)_예상문제.md"),
+    (6, "[부록: 선택과목 대비] 제5과목 대체: 임산가공학", "06_임산가공_예상문제.md")
 ]
 
 # Read all question blocks

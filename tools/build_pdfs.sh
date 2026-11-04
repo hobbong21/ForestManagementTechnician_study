@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# (선택) md 문서를 인쇄용 PDF로 변환합니다. 결과는 08_PDF원문모음/00_MD변환본/ 에 저장되며 git에는 올리지 않습니다(.gitignore).
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+out_root="$repo_root/08_PDF원문모음/00_MD변환본"
 
 for tool in pandoc typst; do
   if ! command -v "$tool" >/dev/null 2>&1; then
@@ -10,9 +12,11 @@ for tool in pandoc typst; do
   fi
 done
 
-find "$repo_root" -type d -name .git -prune -o -type f -name '*.md' -print0 |
+find "$repo_root" -type d \( -name .git -o -name 08_PDF원문모음 -o -name tools \) -prune -o -type f -name '*.md' -print0 |
   while IFS= read -r -d '' markdown_file; do
-    pdf_file="${markdown_file%.md} (Markdown).pdf"
+    rel="${markdown_file#"$repo_root"/}"
+    pdf_file="$out_root/${rel%.md}.pdf"
+    mkdir -p "$(dirname "$pdf_file")"
     pandoc "$markdown_file" \
       --from=gfm \
       --pdf-engine=typst \

@@ -153,7 +153,7 @@ def parse_public(path):
 def main():
     data = []
     for code, name, kind in SUBJECTS:
-        path = next(SRC.glob(f"{code}.*.md"))
+        path = next(SRC.glob(f"{code}_*.md"))
         data.append({"code": code, "name": name, "kind": kind, "questions": parse(path, name)})
     public = parse_public(PUBLIC_SRC)
     html = TEMPLATE.read_text(encoding="utf-8").replace(

@@ -12,7 +12,7 @@ FILES = sorted((ROOT / "04_예상문제").glob("*.md")) + sorted((ROOT / "05_모
 HEAD = re.compile(r"^\*\*(?:\d+\.|\[문제 [^\]]+\][^*]*)\*\*")
 NUM_OPT = re.compile(r"(?:^|(?<=\s\s))(?=[①②③④])")
 KOR_OPT = re.compile(r"(?:^|(?<=\s\s))(?=[가나다라마]\.\s)")
-FIELD = re.compile(r"^\*\*(정답|해설|출제 근거|중요도):\*\*\s*(.*)$")
+FIELD = re.compile(r"^\*\*(정답|해설|쉬운 풀이|용어 풀이|출제 근거|중요도):\*\*\s*(.*)$")
 
 
 def split_options(line):
@@ -27,7 +27,7 @@ def is_option(line):
 
 def split_explain(text):
     """' · ', 한글 사이의 ' / ', 문장 끝('다. ')에서 나눈다. 수식(숫자·괄호 옆의 /)은 나누지 않는다."""
-    parts = re.split(r"\s+·\s+|(?<=[^\d()\s])\s/\s(?=[^\d()\s])|(?<=다\.)\s+(?=\S)", text)
+    parts = re.split(r"(?<=[가-힣)\]])\s+·\s+(?=[가-힣(\[])|(?<=[^\d()\s])\s/\s(?=[^\d()\s])|(?<=다\.)\s+(?=\S)", text)
     return [p.strip() for p in parts if p.strip()]
 
 
@@ -68,6 +68,8 @@ def format_question(lines):
             fields.setdefault(cur, [])
             if m.group(2):
                 fields[cur].append(m.group(2).strip())
+        elif cur in ("쉬운 풀이", "용어 풀이"):
+            fields[cur].append(line)
         elif cur == "해설" or cur is None:
             fields.setdefault("해설", []).append(re.sub(r"^[-·]\s*", "", line))
         else:
@@ -88,6 +90,10 @@ def format_question(lines):
                 block.extend(f"- {p}" for p in items)
         for e in extra:
             block += ["", e]
+        if fields.get("쉬운 풀이"):
+            block += ["", f"**쉬운 풀이:** {' '.join(fields['쉬운 풀이'])}"]
+        if fields.get("용어 풀이"):
+            block += ["", "**용어 풀이:**"] + ["- " + re.sub(r"^[-·]\s*", "", x) for x in fields["용어 풀이"]]
         if fields.get("출제 근거"):
             block += ["", f"**출제 근거:** {' '.join(fields['출제 근거'])}"]
         if fields.get("중요도"):

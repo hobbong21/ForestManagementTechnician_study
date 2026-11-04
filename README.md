@@ -61,8 +61,15 @@ ForestManagementTechnician_study/
     ├── format_questions.py · build_quiz.py · quiz_template.html
     ├── build_mocks_3_4_5.py · build_glossary_md.py · pdf_to_md.py
     ├── ref_pdf_to_md.py + pdftext.swift (참조자료 PDF → md)
+    ├── easy_explain.py + easy_explain/ (쉬운 풀이·용어 풀이 데이터)
     └── build_pdfs.sh (선택: md → 인쇄용 PDF)
 ```
+
+## 🆕 쉬운 풀이·용어 풀이
+
+예상문제 677문항, 2021 공개문제 38제, 국가직 9급 기출 120제, 실전 모의고사 2회분까지 **모든 문항**의 해설 아래에 고등학생 눈높이의 **쉬운 풀이**(왜 그런지, 계산 과정, 암기 요령)와 **용어 풀이**(문항에 나온 어려운 용어 2~4개)를 붙였습니다. CBT(모의고사.html) 해설 화면에도 함께 나옵니다.
+
+- 풀이 원본 데이터: `tools/easy_explain/*.json` → `python3 tools/easy_explain.py apply`로 md에 반영 (실전 모의고사는 '원문 #번호'로 예상문제 풀이를 자동으로 가져옴)
 
 ## 모의고사.html 쓰는 법
 

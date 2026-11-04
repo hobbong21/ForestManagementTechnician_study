@@ -1,4 +1,4 @@
-"""04_예상문제/*.md 와 05_모의고사/00_2021년 공개문제 md 를 읽어 05_모의고사/모의고사.html 을 만든다.
+"""04_예상문제/*.md, 05_모의고사/00_2021년 공개문제 md, 05_모의고사/03_국가직9급 기출 md 를 읽어 05_모의고사/모의고사.html 을 만든다.
 
 문제 형식: '**번호.** 지문' 다음 줄들에 ①~④ 보기, 바로 아래 '> **정답:** ... > **해설:** ...'
 문제를 고치면 이 스크립트를 다시 실행: python3 tools/build_quiz.py
@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "04_예상문제"
 OUT = ROOT / "05_모의고사" / "모의고사.html"
 PUBLIC_SRC = ROOT / "05_모의고사" / "00_2021년_필기시험_공개문제_38제.md"
+GONGMU_SRC = next((ROOT / "05_모의고사").glob("03_국가직9급_*.md"))
 TEMPLATE = Path(__file__).resolve().parent / "quiz_template.html"
 
 SUBJECTS = [
@@ -37,8 +38,8 @@ def explain_lines(quote):
     return re.sub(r"\*\*", "", "\n".join(out))
 
 
-def parse(path, subject):
-    text = path.read_text(encoding="utf-8")
+def parse(path, subject, text=None, id_prefix=None, part_fn=None):
+    text = text if text is not None else path.read_text(encoding="utf-8")
     blocks = re.split(r"^(?=\*\*\d+\.\*\* )", text, flags=re.M)
     questions = []
     for block in blocks[1:]:
@@ -63,12 +64,18 @@ def parse(path, subject):
         stem = parts[0].strip()
         options = [p.strip() for p in parts[2::2]]
 
+        if len(options) != 4 and id_prefix and "⚠️" in q_content:
+            # 수식 보기가 추출되지 않은 문항: 번호만 고르게 한다
+            stem = re.sub(r"①~④\s*", "", q_content).strip()
+            options = [f"(원문 PDF의 {k} 보기)" for k in MARKS]
         if len(options) != 4:
             raise SystemExit(f"{path.name} {num}번: 보기 {len(options)}개")
 
-        part = 1 if num <= 20 else 2 if num <= 40 else 3 if num <= 50 else 4 if num <= 100 else 5
+        part = part_fn(num) if part_fn else 1 if num <= 20 else 2 if num <= 40 else 3 if num <= 50 else 4 if num <= 100 else 5
+        if id_prefix:
+            stem = plain(stem.replace("▷ ", ""))
         questions.append({
-            "id": f"{subject}-{num}",
+            "id": f"{id_prefix or subject}-{num}",
             "subject": subject,
             "num": num,
             "part": part,
@@ -150,20 +157,38 @@ def parse_public(path):
     return data
 
 
+def parse_gongmu(path):
+    """'## 2026 조림' 같은 회차별 섹션 → [{name, year, subject, questions}]"""
+    sets = []
+    text = path.read_text(encoding="utf-8")
+    for m in re.finditer(r"^## (\d{4}) (조림|임업경영)\n(.*?)(?=^## \d{4} |\Z)", text, re.M | re.S):
+        year, subj, body = m.groups()
+        qs = parse(path, subj, text=body, id_prefix=f"9급-{year}-{subj}", part_fn=lambda n: 6)
+        if len(qs) != 20:
+            raise SystemExit(f"9급 {year} {subj}: {len(qs)}문항")
+        for q in qs:
+            q["exam"] = f"{year} {subj}"
+        sets.append({"name": f"{year} {subj}", "year": year, "subject": subj, "questions": qs})
+    return sets
+
+
 def main():
     data = []
     for code, name, kind in SUBJECTS:
         path = next(SRC.glob(f"{code}_*.md"))
         data.append({"code": code, "name": name, "kind": kind, "questions": parse(path, name)})
     public = parse_public(PUBLIC_SRC)
+    gongmu = parse_gongmu(GONGMU_SRC)
     html = TEMPLATE.read_text(encoding="utf-8").replace(
         "/*__DATA__*/null", json.dumps(data, ensure_ascii=False)).replace(
-        "/*__PUBLIC__*/null", json.dumps(public, ensure_ascii=False))
+        "/*__PUBLIC__*/null", json.dumps(public, ensure_ascii=False)).replace(
+        "/*__GONGMU__*/null", json.dumps(gongmu, ensure_ascii=False))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
     total = sum(len(s["questions"]) for s in data)
     n_pub = sum(len(s["questions"]) for s in public)
-    print(f"{OUT.relative_to(ROOT)}: 예상 {total}문항 + 2021 공개문제 {n_pub}문항 빌드 완료")
+    n_gm = sum(len(s["questions"]) for s in gongmu)
+    print(f"{OUT.relative_to(ROOT)}: 예상 {total}문항 + 2021 공개문제 {n_pub}문항 + 국가직 9급 기출 {n_gm}문항 빌드 완료")
 
 
 if __name__ == "__main__":

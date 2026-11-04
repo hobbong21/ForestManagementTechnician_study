@@ -85,6 +85,7 @@ select { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid
 <script>
 const DATA = /*__DATA__*/null;
 const PUBLIC = /*__PUBLIC__*/null;
+const GONGMU = /*__GONGMU__*/null;
 const MARKS = ["①", "②", "③", "④"];
 const EXAM_MIN = 150;
 const PER_SUBJECT = 20;
@@ -94,7 +95,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("nfcf-" + k, JSON.stringify(v)); } catch (e) {} },
 };
 const byId = {};
-DATA.concat(PUBLIC).forEach(s => s.questions.forEach(q => { byId[q.id] = q; }));
+DATA.concat(PUBLIC, GONGMU).forEach(s => s.questions.forEach(q => { byId[q.id] = q; }));
 const app = document.getElementById("app");
 let state = null;
 let timerId = null;
@@ -110,7 +111,7 @@ function h(tag, attrs = {}, ...kids) {
   return el;
 }
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function partLabel(p) { return ["2021 공개", "기본", "심화", "참고자료", "기사기출", "법령·지침 원문"][p]; }
+function partLabel(p) { return ["2021 공개", "기본", "심화", "참고자료", "기사기출", "법령·지침 원문", "국가직 9급 기출"][p]; }
 function mark(q, k) { return q.marks ? q.marks[k] : MARKS[k]; }
 function isRight(q, k) { return q.accept ? q.accept.includes(k) : k === q.answer; }
 function wrongSet() { return new Set(store.get("wrong", [])); }
@@ -129,7 +130,7 @@ function home() {
   const total = DATA.reduce((n, s) => n + s.questions.length, 0);
   app.append(
     h("h1", {}, "산림경영지도원 필기 모의고사"),
-    h("p", { class: "sub" }, `2026 학습모듈 기반 예상문제 ${total}문항 + 2021 공식 공개문제 ${PUBLIC.reduce((n, s) => n + s.questions.length, 0)}문항 · 과목별 40% 과락, 전체 60% 기준으로 채점`),
+    h("p", { class: "sub" }, `2026 학습모듈 기반 예상문제 ${total}문항 + 2021 공식 공개문제 ${PUBLIC.reduce((n, s) => n + s.questions.length, 0)}문항 + 국가직 9급 기출 ${GONGMU.reduce((n, s) => n + s.questions.length, 0)}문항 · 과목별 40% 과락, 전체 60% 기준으로 채점`),
   );
 
   const elective = DATA.filter(s => s.kind === "선택");
@@ -167,6 +168,21 @@ function home() {
     h("div", { style: "margin-top:14px" }, h("button", { class: "primary", onclick: startPublic }, "시작")),
   );
 
+  const nGm = GONGMU.reduce((n, s) => n + s.questions.length, 0);
+  const gmCount = subj => GONGMU.filter(s => s.subject === subj).reduce((n, s) => n + s.questions.length, 0);
+  const gongmuCard = h("div", { class: "card" },
+    h("h2", {}, `국가직 9급 조림·임업경영 기출 ${nGm}제`),
+    h("p", { class: "muted" }, "2024~2026 국가공무원 9급 시험지 원문 · 인사혁신처 공식 정답 · 학습모듈 기준 해설과 중요도(★)"),
+    h("div", { class: "row" },
+      h("select", { id: "gmSet" },
+        h("option", { value: "" }, `전체 (${nGm}문항)`),
+        h("option", { value: "subj:조림" }, `조림 전 회차 (${gmCount("조림")}문항)`),
+        h("option", { value: "subj:임업경영" }, `임업경영 전 회차 (${gmCount("임업경영")}문항)`),
+        ...GONGMU.map(s => h("option", { value: s.name }, `${s.name} (${s.questions.length}문항)`))),
+      h("label", { class: "chip" }, h("input", { type: "checkbox", id: "gmShuffle" }), "섞기")),
+    h("div", { style: "margin-top:14px" }, h("button", { class: "primary", onclick: startGongmu }, "시작")),
+  );
+
   const w = wrongSet();
   const wrongCard = h("div", { class: "card" },
     h("h2", {}, "오답노트"),
@@ -176,7 +192,7 @@ function home() {
       h("button", { disabled: w.size === 0, onclick: () => { if (confirm("오답노트를 비울까요?")) { saveWrong(new Set()); home(); } } }, "비우기")),
   );
 
-  app.append(h("div", { class: "grid" }, examCard, practiceCard), publicCard, wrongCard);
+  app.append(h("div", { class: "grid" }, examCard, practiceCard), publicCard, gongmuCard, wrongCard);
 
   const hist = store.get("history", []);
   if (hist.length) {
@@ -306,6 +322,12 @@ function startPublic() {
   let qs = PUBLIC.filter(s => !name || s.name === name).flatMap(s => s.questions);
   if (document.getElementById("pubShuffle").checked) qs = shuffle(qs);
   runDrill(qs, `2021 공개문제${name ? " · " + name : ""}`);
+}
+function startGongmu() {
+  const v = document.getElementById("gmSet").value;
+  let qs = GONGMU.filter(s => !v || s.name === v || (v.startsWith("subj:") && s.subject === v.slice(5))).flatMap(s => s.questions);
+  if (document.getElementById("gmShuffle").checked) qs = shuffle(qs);
+  runDrill(qs, `국가직 9급 기출${v ? " · " + v.replace("subj:", "") : ""}`);
 }
 function startWrong() {
   const qs = shuffle([...wrongSet()].map(id => byId[id]).filter(Boolean));

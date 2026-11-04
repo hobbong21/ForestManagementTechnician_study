@@ -58,13 +58,14 @@ ForestManagementTechnician_study/
 │   ├── 03_참조자료/          01_조림 ~ 06_임산가공 (법령·지침·고시 원문 + 별표/)
 │   ├── 04_기출문제/          2021 공개문제 원본 + 국가직 9급 시험지·정답표
 │   ├── 05_예상문제/          예상문제 6과목 PDF (md에서 생성)
-│   └── 06_모의고사/          공개문제·실전모의고사·9급 기출 PDF (md에서 생성)
+│   ├── 06_모의고사/          공개문제·실전모의고사·9급 기출 PDF (md에서 생성)
+│   └── 07_암기요약표/        암기요약표 00~07 PDF (md에서 생성)
 └── tools/
     ├── format_questions.py · build_quiz.py · quiz_template.html
     ├── build_mocks_3_4_5.py · build_glossary_md.py · pdf_to_md.py
     ├── ref_pdf_to_md.py + pdftext.swift (참조자료 PDF → md)
     ├── easy_explain.py + easy_explain/ (쉬운 풀이·용어 풀이 데이터)
-    ├── build_question_pdfs.sh (예상문제·모의고사 → 08 폴더 PDF)
+    ├── build_question_pdfs.sh (예상문제·모의고사·암기요약표 → 08 폴더 PDF)
     └── build_pdfs.sh (선택: md 전체 → 인쇄용 PDF)
 ```
 

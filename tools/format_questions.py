@@ -12,7 +12,7 @@ FILES = sorted((ROOT / "04_예상문제").glob("*.md")) + sorted((ROOT / "05_모
 HEAD = re.compile(r"^\*\*(?:\d+\.|\[문제 [^\]]+\][^*]*)\*\*")
 NUM_OPT = re.compile(r"(?:^|(?<=\s\s))(?=[①②③④])")
 KOR_OPT = re.compile(r"(?:^|(?<=\s\s))(?=[가나다라마]\.\s)")
-FIELD = re.compile(r"^\*\*(정답|해설|출제 근거):\*\*\s*(.*)$")
+FIELD = re.compile(r"^\*\*(정답|해설|출제 근거|중요도):\*\*\s*(.*)$")
 
 
 def split_options(line):
@@ -90,6 +90,8 @@ def format_question(lines):
             block += ["", e]
         if fields.get("출제 근거"):
             block += ["", f"**출제 근거:** {' '.join(fields['출제 근거'])}"]
+        if fields.get("중요도"):
+            block += ["", f"**중요도:** {' '.join(fields['중요도'])}"]
         out.extend(f"> {b}" if b else ">" for b in block)
     return out
 
